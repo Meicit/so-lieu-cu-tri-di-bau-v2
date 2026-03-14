@@ -11,47 +11,53 @@
     <style>
         :root { --vn-red: #da251d; --dark-blue: #1e3c72; }
         body { background-color: #f4f7f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .header-panel { background: linear-gradient(135deg, #da251d 0%, #a01a14 100%); color: white; padding: 2rem 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2); margin-bottom: 2rem; }
+        .header-panel { background: linear-gradient(135deg, #da251d 0%, #a01a14 100%); color: white; padding: 1.5rem 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2); margin-bottom: 2rem; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
         .full-width-card-header {
             background-color: #ffffff; border-left: 6px solid #da251d; cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 18px 25px; font-weight: bold; font-size: 1.1rem;
+            padding: 18px 25px; font-weight: bold; color: #1e3c72; font-size: 1.1rem;
         }
         .full-width-card-header:hover { background-color: #fff8f8; }
         .full-width-card-header::after { content: '▼'; font-size: 0.9rem; transition: transform 0.3s; }
         .full-width-card-header.collapsed::after { transform: rotate(-90deg); }
 
         .table-container-full { overflow-x: auto; width: 100%; }
-        .input-voter { width: 70px; text-align: center; border: 1px solid #ced4da; border-radius: 4px; padding: 3px; font-size: 0.9rem; }
-        .input-total-edit { width: 80px; text-align: center; border: 1px dashed #da251d; background: #fffbe6; font-weight: bold; }
+        .input-voter { width: 70px; text-align: center; border: 1px solid #ced4da; border-radius: 4px; padding: 2px; }
+        .input-total-edit { width: 85px; text-align: center; border: 1px dashed #da251d; background: #fffbe6; font-weight: bold; }
         
         .total-cell-wrapper { display: flex; align-items: center; justify-content: center; gap: 4px; }
         .btn-edit-inline { font-size: 0.7rem; padding: 1px 4px; color: #da251d; border-color: #da251d; }
 
-        .log-section { background: #212529; color: #00ff41; font-family: 'Consolas', monospace; padding: 15px; border-radius: 8px; max-height: 250px; overflow-y: auto; font-size: 0.85rem; }
-        .log-item { border-bottom: 1px solid #333; padding: 5px 0; }
+        .btn-sync { background-color: #da251d; color: white; font-weight: bold; border-radius: 30px; padding: 10px 25px; box-shadow: 0 4px 10px rgba(218,37,29,0.3); transition: all 0.3s; }
+        .btn-sync:hover { background-color: #a01a14; transform: translateY(-2px); color: white; }
+
+        .unit-table-header th { color: #ffeb3b !important; font-weight: bold; text-transform: uppercase; }
+        .log-section { background: #212529; color: #00ff41; font-family: 'Consolas', monospace; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; font-size: 0.8rem; }
         
-        th { background-color: #f8f9fa !important; font-size: 0.85rem; text-transform: uppercase; vertical-align: middle !important; }
-        .unit-table-header th { color: #ffeb3b !important; font-weight: bold; }
-        .text-unvoted { color: #6c757d; font-weight: 500; }
-        .bg-highlight-unvoted { background-color: #fdf2f2 !important; }
-        
-        /* Loading Overlay */
-        #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.8); z-index:9999; display:flex; align-items:center; justify-content:center; display:none; }
+        #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index:9999; display:none; align-items:center; justify-content:center; color: white; flex-direction: column; }
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay"><div class="spinner-border text-danger"></div><span class="ms-2"> Đang đồng bộ...</span></div>
+<div id="loadingOverlay">
+    <div class="spinner-border text-light mb-2"></div>
+    <div class="fw-bold">ĐANG ĐỒNG BỘ DỮ LIỆU...</div>
+</div>
 
 <div class="header-panel text-center">
-    <h1 class="fw-bold">HỆ THỐNG THEO DÕI TIẾN ĐỘ CỬ TRI ĐI BẦU</h1>
-    <p class="lead text-uppercase mb-0">Dữ liệu tổng hợp và chi tiết (Đồng bộ Google Sheets)</p>
+    <h1 class="fw-bold">HỆ THỐNG THEO DÕI TIẾN ĐỘ CỬ TRI</h1>
+    <p class="lead text-uppercase mb-0">Đồng bộ dữ liệu Cloud: Google Sheets</p>
 </div>
 
 <div class="container-fluid px-4">
+    <div class="d-flex justify-content-center mb-4">
+        <button class="btn btn-sync" onclick="syncWithGoogle()">
+            <span class="me-2">☁</span> ĐỒNG BỘ DỮ LIỆU LÊN CLOUD
+        </button>
+    </div>
+
     <div class="row mb-4">
         <div class="col-lg-6"><div class="card p-3 h-100"><canvas id="timeLineChart" height="180"></canvas></div></div>
         <div class="col-lg-6"><div class="card p-3 h-100"><canvas id="unitBarChart" height="180"></canvas></div></div>
@@ -65,9 +71,7 @@
             <div class="card-body p-0">
                 <table class="table table-striped table-bordered mb-0 text-center align-middle">
                     <thead class="table-dark unit-table-header">
-                        <tr>
-                            <th>Đơn vị</th><th>Tổng số cử tri</th><th>Số cử tri đã bầu</th><th>Chưa đi bầu</th><th>Tỷ lệ %</th>
-                        </tr>
+                        <tr><th>Đơn vị</th><th>Tổng số</th><th>Đã bầu</th><th>Chưa bầu</th><th>Tỷ lệ %</th></tr>
                     </thead>
                     <tbody id="unitSummaryBody"></tbody>
                 </table>
@@ -77,20 +81,19 @@
 
     <div class="card w-100">
         <div class="full-width-card-header collapsed" data-bs-toggle="collapse" data-bs-target="#collapseKhuVuc">
-            <span style="color: #1e3c72;">2. CHI TIẾT DỮ LIỆU 34 KHU VỰC BỎ PHIẾU (NHẬP LIỆU)</span>
+            <span style="color: #1e3c72;">2. CHI TIẾT NHẬP LIỆU 34 KHU VỰC</span>
         </div>
         <div id="collapseKhuVuc" class="collapse">
             <div class="card-body">
-                <div class="d-flex justify-content-end mb-3 gap-2">
-                    <button class="btn btn-primary btn-sm px-3" onclick="syncWithGoogle()">Đồng bộ thủ công</button>
-                    <button class="btn btn-success btn-sm px-3" onclick="exportData()">Xuất file CSV</button>
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-outline-success btn-sm" onclick="exportData()">Xuất file CSV báo cáo</button>
                 </div>
                 <div class="table-container-full">
                     <table class="table table-hover table-bordered align-middle text-center">
                         <thead class="table-light">
                             <tr>
                                 <th rowspan="2">STT</th><th rowspan="2" style="min-width: 180px;">Khu vực</th><th rowspan="2">Tổng số</th>
-                                <th colspan="5">Số cử tri đi bầu</th><th rowspan="2" class="bg-light">Chưa bầu</th><th rowspan="2">Tỷ lệ %</th>
+                                <th colspan="5">Số cử tri đi bầu</th><th rowspan="2">Chưa bầu</th><th rowspan="2">Tỷ lệ %</th>
                             </tr>
                             <tr><th>9:00</th><th>11:30</th><th>15:00</th><th>19:00</th><th>22:00</th></tr>
                         </thead>
@@ -115,47 +118,54 @@
     </div>
 
     <div class="card w-100 mb-5">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <span class="fw-bold">NHẬT KÝ THAY ĐỔI HỆ THỐNG</span>
-            <button class="btn btn-outline-light btn-sm" onclick="clearLogs()">Xóa lịch sử</button>
-        </div>
+        <div class="card-header bg-dark text-white fw-bold small">NHẬT KÝ HỆ THỐNG</div>
         <div class="card-body"><div class="log-section" id="logContainer"></div></div>
     </div>
 </div>
 
 <script>
-// --- CẤU HÌNH GOOGLE SHEETS ---
+// URL CỦA BẠN ĐÃ ĐƯỢC CẬP NHẬT
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUNbD2WnioJyjeneVWEtzPwhrdUo4koFNa3Jf2PrnV7G_tZHKYvZMzUngREyrrEG_opQ/exec"; 
 
 let voterData = [];
-let editLogs = JSON.parse(localStorage.getItem('voterLogs_v3')) || [];
+let editLogs = [];
 let timeLineChart, unitBarChart, detailAreaChart;
 
-// 1. Tải dữ liệu ban đầu
+// Tải dữ liệu từ Google Sheets khi mở trang
 async function loadData() {
     document.getElementById('loadingOverlay').style.display = 'flex';
     try {
         const response = await fetch(SCRIPT_URL);
         voterData = await response.json();
         init();
-    } catch (e) {
-        alert("Không thể kết nối Google Sheets. Vui lòng kiểm tra SCRIPT_URL.");
+        addLog("Đã đồng bộ thành công dữ liệu từ Cloud", "text-success");
+    } catch (e) { 
+        alert("Lỗi tải dữ liệu! Vui lòng kiểm tra kết nối mạng."); 
     }
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
-// 2. Gửi dữ liệu lên Google
+// Hàm đồng bộ thủ công khi bấm nút
 async function syncWithGoogle() {
+    if (!confirm("Xác nhận đẩy toàn bộ số liệu hiện tại lên Cloud?")) return;
+    
     document.getElementById('loadingOverlay').style.display = 'flex';
     try {
+        const formData = new URLSearchParams();
+        formData.append('data', JSON.stringify(voterData));
+
         await fetch(SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(voterData)
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData
         });
-        addLog("Đã đồng bộ dữ liệu lên đám mây", "text-success");
-    } catch (e) { console.error(e); }
+        
+        addLog("ĐÃ ĐỒNG BỘ LÊN CLOUD THÀNH CÔNG", "text-warning fw-bold");
+        alert("Đã lưu dữ liệu lên Google Sheets thành công!");
+    } catch (e) { 
+        alert("Lỗi đồng bộ dữ liệu!"); 
+    }
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
@@ -170,73 +180,40 @@ function renderTable() {
         tbody.innerHTML += `
             <tr>
                 <td>${row.stt}</td>
-                <td class="text-start">${row.khu_vuc}</td>
+                <td class="text-start small">${row.khu_vuc}</td>
                 <td>
                     <div class="total-cell-wrapper">
                         <input type="number" id="tong-${index}" class="input-total-edit" value="${row.tong}" disabled onchange="saveTotal(${index}, this.value)">
                         <button class="btn btn-outline-danger btn-edit-inline" onclick="enableEdit(${index})">Sửa</button>
                     </div>
                 </td>
-                <td><input type="number" class="input-voter" value="${row.h9}" onfocus="this.oldVal=this.value" onchange="updateVal(${index},'h9',this.value,'9:00',this.oldVal)"></td>
-                <td><input type="number" class="input-voter" value="${row.h11}" onfocus="this.oldVal=this.value" onchange="updateVal(${index},'h11',this.value,'11:30',this.oldVal)"></td>
-                <td><input type="number" class="input-voter" value="${row.h15}" onfocus="this.oldVal=this.value" onchange="updateVal(${index},'h15',this.value,'15:00',this.oldVal)"></td>
-                <td><input type="number" class="input-voter" value="${row.h19}" onfocus="this.oldVal=this.value" onchange="updateVal(${index},'h19',this.value,'19:00',this.oldVal)"></td>
-                <td><input type="number" class="input-voter" value="${row.h22}" onfocus="this.oldVal=this.value" onchange="updateVal(${index},'h22',this.value,'22:00',this.oldVal)"></td>
-                <td class="text-unvoted bg-highlight-unvoted">${(row.tong - current).toLocaleString()}</td>
+                <td><input type="number" class="input-voter" value="${row.h9}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h9',this.value,'9:00',this.oldV)"></td>
+                <td><input type="number" class="input-voter" value="${row.h11}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h11',this.value,'11:30',this.oldV)"></td>
+                <td><input type="number" class="input-voter" value="${row.h15}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h15',this.value,'15:00',this.oldV)"></td>
+                <td><input type="number" class="input-voter" value="${row.h19}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h19',this.value,'19:00',this.oldV)"></td>
+                <td><input type="number" class="input-voter" value="${row.h22}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h22',this.value,'22:00',this.oldV)"></td>
+                <td style="color:#666">${(row.tong - current).toLocaleString()}</td>
                 <td class="fw-bold text-danger">${p}%</td>
             </tr>`;
     });
 }
 
-// Tìm hàm này trong file index.html và sửa lại như sau:
 function updateUnitSummary() {
     const summary = {};
     voterData.forEach(item => {
-        // Lấy đúng giá trị don_vi từ dữ liệu
-        const dv = item.don_vi; 
+        const dv = item.don_vi;
         if (!summary[dv]) summary[dv] = { tong: 0, current: 0 };
         summary[dv].tong += parseInt(item.tong) || 0;
         summary[dv].current += Math.max(item.h9, item.h11, item.h15, item.h19, item.h22);
     });
-    
     const tbody = document.getElementById('unitSummaryBody');
     tbody.innerHTML = '';
-    
-    // Sắp xếp đơn vị theo thứ tự 1, 2, 3... cho đẹp
-    const sortedUnits = Object.keys(summary).sort((a, b) => a - b);
-    
-    for (let unit of sortedUnits) {
+    Object.keys(summary).sort((a,b)=>a-b).forEach(unit => {
         const s = summary[unit];
         const p = s.tong > 0 ? ((s.current / s.tong) * 100).toFixed(2) : 0;
-        tbody.innerHTML += `
-            <tr class="fw-bold">
-                <td>ĐƠN VỊ ${unit}</td>
-                <td>${s.tong.toLocaleString()}</td>
-                <td>${s.current.toLocaleString()}</td>
-                <td class="text-unvoted">${(s.tong - s.current).toLocaleString()}</td>
-                <td class="text-primary">${p}%</td>
-            </tr>`;
-    }
+        tbody.innerHTML += `<tr class="fw-bold"><td>ĐƠN VỊ ${unit}</td><td>${s.tong.toLocaleString()}</td><td>${s.current.toLocaleString()}</td><td>${(s.tong-s.current).toLocaleString()}</td><td class="text-primary">${p}%</td></tr>`;
+    });
     return summary;
-}
-
-function updateVal(index, field, newVal, label, oldVal) {
-    newVal = parseInt(newVal) || 0; oldVal = parseInt(oldVal) || 0;
-    if (newVal !== oldVal) {
-        voterData[index][field] = newVal;
-        addLog(`Sửa mốc ${label} - ${voterData[index].khu_vuc}: ${oldVal} → ${newVal}`, 'text-info');
-        init(); syncWithGoogle();
-    }
-}
-
-function saveTotal(index, newVal) {
-    const oldVal = voterData[index].tong; newVal = parseInt(newVal) || 0;
-    if (oldVal !== newVal) {
-        voterData[index].tong = newVal;
-        addLog(`SỬA TỔNG - ${voterData[index].khu_vuc}: ${oldVal} → ${newVal}`, 'text-warning');
-        init(); syncWithGoogle();
-    }
-    document.getElementById(`tong-${index}`).disabled = true;
 }
 
 function updateCharts() {
@@ -246,6 +223,7 @@ function updateCharts() {
         return totalVoters > 0 ? ((val / totalVoters) * 100).toFixed(2) : 0;
     });
 
+    // Biểu đồ Line
     if (timeLineChart) timeLineChart.destroy();
     timeLineChart = new Chart(document.getElementById('timeLineChart'), {
         type: 'line',
@@ -253,16 +231,19 @@ function updateCharts() {
     });
 
     const summary = updateUnitSummary();
+
+    // Biểu đồ Đơn vị
     if (unitBarChart) unitBarChart.destroy();
     unitBarChart = new Chart(document.getElementById('unitBarChart'), {
         type: 'bar', plugins: [ChartDataLabels],
         data: {
-            labels: Object.keys(summary).map(u => 'ĐV ' + u),
-            datasets: [{ label: 'Tỷ lệ %', data: Object.values(summary).map(s => s.tong > 0 ? ((s.current/s.tong)*100).toFixed(2) : 0), backgroundColor: '#1e3c72', borderRadius: 5 }]
+            labels: Object.keys(summary).sort((a,b)=>a-b).map(u => 'ĐV ' + u),
+            datasets: [{ label: 'Tỷ lệ %', data: Object.keys(summary).sort((a,b)=>a-b).map(u => summary[u].tong > 0 ? ((summary[u].current/summary[u].tong)*100).toFixed(2) : 0), backgroundColor: '#1e3c72', borderRadius: 5 }]
         },
         options: { scales: { y: { max: 115 } }, plugins: { datalabels: { anchor: 'end', align: 'top', formatter: v => v + '%', color: '#da251d', font: { weight: 'bold' } }, legend: { display: false } } }
     });
 
+    // Biểu đồ 34 Khu vực
     if (detailAreaChart) detailAreaChart.destroy();
     detailAreaChart = new Chart(document.getElementById('detailAreaChart'), {
         type: 'bar', plugins: [ChartDataLabels],
@@ -277,22 +258,40 @@ function updateCharts() {
     });
 }
 
+function updateVal(index, field, newVal, label, oldVal) {
+    newVal = parseInt(newVal) || 0; oldVal = parseInt(oldVal) || 0;
+    if (newVal !== oldVal) {
+        voterData[index][field] = newVal;
+        addLog(`Sửa mốc ${label} - ${voterData[index].khu_vuc}: ${oldVal} → ${newVal}`, 'text-info');
+        init();
+    }
+}
+
+function saveTotal(index, newVal) {
+    const oldVal = voterData[index].tong; newVal = parseInt(newVal) || 0;
+    if (oldVal !== newVal) {
+        voterData[index].tong = newVal;
+        addLog(`SỬA TỔNG - ${voterData[index].khu_vuc}: ${oldVal} → ${newVal}`, 'text-warning');
+        init();
+    }
+    document.getElementById(`tong-${index}`).disabled = true;
+}
+
 function enableEdit(index) { const el = document.getElementById(`tong-${index}`); el.disabled = false; el.focus(); el.select(); }
 function addLog(msg, colorClass) {
     const time = new Date().toLocaleTimeString('vi-VN');
     editLogs.unshift({ time, msg, colorClass });
-    localStorage.setItem('voterLogs_v3', JSON.stringify(editLogs));
+    if (editLogs.length > 50) editLogs.pop();
     renderLogs();
 }
 function renderLogs() { document.getElementById('logContainer').innerHTML = editLogs.map(l => `<div class="log-item"><span class="text-muted small">[${l.time}]</span> <span class="${l.colorClass}">${l.msg}</span></div>`).join(''); }
-function clearLogs() { if(confirm('Xóa logs?')) { editLogs=[]; localStorage.removeItem('voterLogs_v3'); renderLogs(); } }
+
 function exportData() {
-    let csv = "\ufeffSTT,Khu Vuc,Tong,h9,h11,h15,h19,h22\n";
-    voterData.forEach(r => { csv += `${r.stt},${r.khu_vuc},${r.tong},${r.h9},${r.h11},${r.h15},${r.h19},${r.h22}\n`; });
-    const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); link.download = "bao_cao.csv"; link.click();
+    let csv = "\ufeffSTT,Don Vi,Khu Vuc,Tong,h9,h11,h15,h19,h22\n";
+    voterData.forEach(r => { csv += `${r.stt},${r.don_vi},${r.khu_vuc},${r.tong},${r.h9},${r.h11},${r.h15},${r.h19},${r.h22}\n`; });
+    const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); link.download = "bao_cao_bau_cu.csv"; link.click();
 }
 
-// Bắt đầu tải dữ liệu
 window.onload = loadData;
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
