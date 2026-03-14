@@ -7,36 +7,19 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
- 
     <style>
         :root { --vn-red: #da251d; --dark-blue: #1e3c72; }
-        body { background-color: #f4f7f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7f9; font-family: 'Segoe UI', sans-serif; }
         .header-panel { background: linear-gradient(135deg, #da251d 0%, #a01a14 100%); color: white; padding: 1.5rem 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2); margin-bottom: 2rem; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        
-        .full-width-card-header {
-            background-color: #ffffff; border-left: 6px solid #da251d; cursor: pointer;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 18px 25px; font-weight: bold; color: #1e3c72; font-size: 1.1rem;
-        }
+        .full-width-card-header { background-color: #ffffff; border-left: 6px solid #da251d; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 18px 25px; font-weight: bold; color: #1e3c72; font-size: 1.1rem; }
         .full-width-card-header:hover { background-color: #fff8f8; }
-        .full-width-card-header::after { content: '▼'; font-size: 0.8rem; transition: transform 0.3s; }
+        .full-width-card-header::after { content: '▼'; font-size: 0.9rem; transition: transform 0.3s; }
         .full-width-card-header.collapsed::after { transform: rotate(-90deg); }
-
-        .table-container-full { overflow-x: auto; width: 100%; }
-        .input-voter { width: 70px; text-align: center; border: 1px solid #ced4da; border-radius: 4px; padding: 2px; }
-        .input-total-edit { width: 85px; text-align: center; border: 1px dashed #da251d; background: #fffbe6; font-weight: bold; }
-        
-        .total-cell-wrapper { display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .btn-edit-inline { font-size: 0.7rem; padding: 1px 4px; color: #da251d; border-color: #da251d; }
-
-        /* Nút đồng bộ kiểu mới để nằm trong card */
-        .btn-sync { background-color: #da251d; color: white; font-weight: bold; border-radius: 5px; padding: 5px 15px; font-size: 0.85rem; transition: all 0.3s; border: none; }
-        .btn-sync:hover { background-color: #a01a14; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
         .unit-table-header th { color: #ffeb3b !important; font-weight: bold; text-transform: uppercase; }
+        .input-voter { width: 65px; text-align: center; border: 1px solid #ddd; border-radius: 4px; padding: 2px; }
+        .input-total-edit { width: 80px; text-align: center; border: 1px dashed #da251d; background: #fffbe6; font-weight: bold; }
         .log-section { background: #212529; color: #00ff41; font-family: 'Consolas', monospace; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; font-size: 0.8rem; }
-        
         #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index:9999; display:none; align-items:center; justify-content:center; color: white; flex-direction: column; }
     </style>
 </head>
@@ -49,7 +32,7 @@
 
 <div class="header-panel text-center">
     <h1 class="fw-bold">HỆ THỐNG THEO DÕI TIẾN ĐỘ CỬ TRI</h1>
-    <p class="lead text-uppercase mb-0">Đồng bộ dữ liệu Cloud: Google Sheets</p>
+    <p class="lead text-uppercase mb-0">Báo cáo số liệu lũy tiến - Đồng bộ Google Sheets</p>
 </div>
 
 <div class="container-fluid px-4">
@@ -60,12 +43,12 @@
 
     <div class="card w-100 overflow-hidden">
         <div class="full-width-card-header" data-bs-toggle="collapse" data-bs-target="#collapseChartDetail">
-            <span style="color: #28a745;">1. BIỂU ĐỒ SO SÁNH TỶ LỆ 34 KHU VỰC BỎ PHIẾU</span>
+            <span style="color: #28a745;">1. BIỂU ĐỒ SO SÁNH TỶ LỆ THEO MỐC GIỜ MỚI NHẤT (34 KV)</span>
         </div>
         <div id="collapseChartDetail" class="collapse show">
             <div class="card-body">
                 <div style="width: 100%; overflow-x: auto;">
-                    <div style="min-width: 1500px; height: 500px;"><canvas id="detailAreaChart"></canvas></div>
+                    <div style="min-width: 1500px; height: 400px;"><canvas id="detailAreaChart"></canvas></div>
                 </div>
             </div>
         </div>
@@ -73,13 +56,13 @@
 
     <div class="card w-100 overflow-hidden">
         <div class="full-width-card-header collapsed" data-bs-toggle="collapse" data-bs-target="#collapseUnit">
-            <span style="color: #da251d;">2. TỔNG HỢP TỶ LỆ THEO ĐƠN VỊ BẦU CỬ</span>
+            <span style="color: #da251d;">2. TỔNG HỢP TỶ LỆ ĐƠN VỊ (TÍNH TRÊN MỐC GIỜ GẦN NHẤT)</span>
         </div>
         <div id="collapseUnit" class="collapse">
             <div class="card-body p-0">
                 <table class="table table-striped table-bordered mb-0 text-center align-middle">
                     <thead class="table-dark unit-table-header">
-                        <tr><th>Đơn vị</th><th>Tổng số</th><th>Đã bầu</th><th>Chưa bầu</th><th>Tỷ lệ %</th></tr>
+                        <tr><th>Đơn vị</th><th>Tổng số cử tri</th><th>Đã bầu hiện tại</th><th>Cử tri chưa bầu</th><th>Tỷ lệ %</th></tr>
                     </thead>
                     <tbody id="unitSummaryBody"></tbody>
                 </table>
@@ -89,22 +72,20 @@
 
     <div class="card w-100">
         <div class="full-width-card-header collapsed" data-bs-toggle="collapse" data-bs-target="#collapseKhuVuc">
-            <span style="color: #1e3c72;">3. CHI TIẾT NHẬP LIỆU 34 KHU VỰC BỎ PHIẾU</span>
+            <span style="color: #1e3c72;">3. CHI TIẾT NHẬP LIỆU LŨY TIẾN (34 KHU VỰC)</span>
         </div>
         <div id="collapseKhuVuc" class="collapse">
             <div class="card-body">
                 <div class="d-flex justify-content-end mb-3 gap-2">
-                    <button class="btn btn-sync" onclick="syncWithGoogle()">
-                        <span class="me-1">☁</span> ĐỒNG BỘ LÊN CLOUD
-                    </button>
+                    <button class="btn btn-danger btn-sm px-3 fw-bold" onclick="syncWithGoogle()">☁ ĐỒNG BỘ LÊN CLOUD</button>
                     <button class="btn btn-outline-success btn-sm" onclick="exportData()">Xuất file CSV</button>
                 </div>
                 <div class="table-container-full">
-                    <table class="table table-hover table-bordered align-middle text-center">
+                    <table class="table table-hover table-bordered align-middle text-center small">
                         <thead class="table-light">
                             <tr>
-                                <th rowspan="2">STT</th><th rowspan="2" style="min-width: 180px;">Khu vực</th><th rowspan="2">Tổng số</th>
-                                <th colspan="5">Số cử tri đi bầu</th><th rowspan="2">Chưa bầu</th><th rowspan="2">Tỷ lệ %</th>
+                                <th rowspan="2">STT</th><th rowspan="2">ĐV</th><th rowspan="2" style="min-width: 160px;">Khu vực bỏ phiếu</th><th rowspan="2">Tổng số</th>
+                                <th colspan="5">Số bầu lũy tiến</th><th rowspan="2" class="bg-light">Chưa bầu</th><th rowspan="2">Tỷ lệ %</th>
                             </tr>
                             <tr><th>9:00</th><th>11:30</th><th>15:00</th><th>19:00</th><th>22:00</th></tr>
                         </thead>
@@ -114,54 +95,61 @@
             </div>
         </div>
     </div>
-
-    <div class="card w-100 mb-5">
-        <div class="card-header bg-dark text-white fw-bold small">NHẬT KÝ HỆ THỐNG</div>
-        <div class="card-body"><div class="log-section" id="logContainer"></div></div>
-    </div>
+    
+    <div class="card w-100 mb-5"><div class="card-body"><div class="log-section" id="logContainer"></div></div></div>
 </div>
 
 <script>
-// URL CỦA BẠN
+// --- CẤU HÌNH ---
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUNbD2WnioJyjeneVWEtzPwhrdUo4koFNa3Jf2PrnV7G_tZHKYvZMzUngREyrrEG_opQ/exec"; 
 
+// THUẬT TOÁN MỚI: Lấy giá trị tại mốc thời gian gần nhất có dữ liệu (Lũy tiến)
+function getCurrent(row) {
+    if (parseInt(row.h22) > 0) return parseInt(row.h22);
+    if (parseInt(row.h19) > 0) return parseInt(row.h19);
+    if (parseInt(row.h15) > 0) return parseInt(row.h15);
+    if (parseInt(row.h11) > 0) return parseInt(row.h11);
+    if (parseInt(row.h9) > 0) return parseInt(row.h9);
+    return 0;
+}
+
+function getUnitByKV(stt) {
+    stt = parseInt(stt);
+    if (stt <= 3) return "1"; if (stt <= 5) return "2"; if (stt <= 7) return "3"; if (stt <= 10) return "4";
+    if (stt <= 14) return "5"; if (stt <= 18) return "6"; if (stt <= 21) return "7"; if (stt <= 24) return "8";
+    if (stt <= 29) return "9"; if (stt <= 34) return "10";
+    return "Khác";
+}
+
 let voterData = [];
-let editLogs = [];
 let timeLineChart, unitBarChart, detailAreaChart;
+let editLogs = [];
 
 async function loadData() {
     document.getElementById('loadingOverlay').style.display = 'flex';
     try {
         const response = await fetch(SCRIPT_URL);
-        voterData = await response.json();
+        const dataFromSheet = await response.json();
+        voterData = dataFromSheet.map(item => ({ 
+            ...item, 
+            don_vi: getUnitByKV(item.stt),
+            h9: item.h9 || 0, h11: item.h11 || 0, h15: item.h15 || 0, h19: item.h19 || 0, h22: item.h22 || 0
+        }));
         init();
-        addLog("Đã đồng bộ thành công dữ liệu từ Cloud", "text-success");
-    } catch (e) { 
-        alert("Lỗi tải dữ liệu! Vui lòng kiểm tra kết nối mạng."); 
-    }
+    } catch (e) { alert("Lỗi kết nối Cloud!"); }
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
 async function syncWithGoogle() {
-    if (!confirm("Xác nhận đẩy toàn bộ số liệu hiện tại lên Cloud?")) return;
-    
+    if (!confirm("Xác nhận đẩy toàn bộ số liệu lên Cloud?")) return;
     document.getElementById('loadingOverlay').style.display = 'flex';
     try {
         const formData = new URLSearchParams();
         formData.append('data', JSON.stringify(voterData));
-
-        await fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: formData
-        });
-        
-        addLog("ĐÃ ĐỒNG BỘ LÊN CLOUD THÀNH CÔNG", "text-warning fw-bold");
-        alert("Đã lưu dữ liệu lên Google Sheets thành công!");
-    } catch (e) { 
-        alert("Lỗi đồng bộ dữ liệu!"); 
-    }
+        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData });
+        addLog("Đồng bộ thành công dữ liệu lũy tiến", "text-warning fw-bold");
+        alert("Đã lưu dữ liệu thành công!");
+    } catch (e) { alert("Lỗi đồng bộ!"); }
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
@@ -171,24 +159,20 @@ function renderTable() {
     const tbody = document.getElementById('voterDataBody');
     tbody.innerHTML = '';
     voterData.forEach((row, index) => {
-        const current = Math.max(row.h9, row.h11, row.h15, row.h19, row.h22);
+        const current = getCurrent(row); // Sử dụng thuật toán lũy tiến mới
         const p = row.tong > 0 ? ((current / row.tong) * 100).toFixed(2) : 0;
         tbody.innerHTML += `
             <tr>
                 <td>${row.stt}</td>
-                <td class="text-start small">${row.khu_vuc}</td>
-                <td>
-                    <div class="total-cell-wrapper">
-                        <input type="number" id="tong-${index}" class="input-total-edit" value="${row.tong}" disabled onchange="saveTotal(${index}, this.value)">
-                        <button class="btn btn-outline-danger btn-edit-inline" onclick="enableEdit(${index})">Sửa</button>
-                    </div>
-                </td>
-                <td><input type="number" class="input-voter" value="${row.h9}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h9',this.value,'9:00',this.oldV)"></td>
-                <td><input type="number" class="input-voter" value="${row.h11}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h11',this.value,'11:30',this.oldV)"></td>
-                <td><input type="number" class="input-voter" value="${row.h15}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h15',this.value,'15:00',this.oldV)"></td>
-                <td><input type="number" class="input-voter" value="${row.h19}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h19',this.value,'19:00',this.oldV)"></td>
-                <td><input type="number" class="input-voter" value="${row.h22}" onfocus="this.oldV=this.value" onchange="updateVal(${index},'h22',this.value,'22:00',this.oldV)"></td>
-                <td style="color:#666">${(row.tong - current).toLocaleString()}</td>
+                <td class="fw-bold text-primary">${row.don_vi}</td>
+                <td class="text-start">${row.khu_vuc}</td>
+                <td><div class="total-cell-wrapper"><input type="number" id="tong-${index}" class="input-total-edit" value="${row.tong}" disabled onchange="saveTotal(${index}, this.value)"><button class="btn btn-outline-danger btn-edit-inline" onclick="enableEdit(${index})">Sửa</button></div></td>
+                <td><input type="number" class="input-voter" value="${row.h9}" onchange="updateVal(${index},'h9',this.value)"></td>
+                <td><input type="number" class="input-voter" value="${row.h11}" onchange="updateVal(${index},'h11',this.value)"></td>
+                <td><input type="number" class="input-voter" value="${row.h15}" onchange="updateVal(${index},'h15',this.value)"></td>
+                <td><input type="number" class="input-voter" value="${row.h19}" onchange="updateVal(${index},'h19',this.value)"></td>
+                <td><input type="number" class="input-voter" value="${row.h22}" onchange="updateVal(${index},'h22',this.value)"></td>
+                <td class="text-secondary">${(row.tong - current).toLocaleString()}</td>
                 <td class="fw-bold text-danger">${p}%</td>
             </tr>`;
     });
@@ -200,11 +184,11 @@ function updateUnitSummary() {
         const dv = item.don_vi;
         if (!summary[dv]) summary[dv] = { tong: 0, current: 0 };
         summary[dv].tong += parseInt(item.tong) || 0;
-        summary[dv].current += Math.max(item.h9, item.h11, item.h15, item.h19, item.h22);
+        summary[dv].current += getCurrent(item); // Sử dụng thuật toán lũy tiến mới
     });
     const tbody = document.getElementById('unitSummaryBody');
     tbody.innerHTML = '';
-    Object.keys(summary).sort((a,b)=>a-b).forEach(unit => {
+    Object.keys(summary).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(unit => {
         const s = summary[unit];
         const p = s.tong > 0 ? ((s.current / s.tong) * 100).toFixed(2) : 0;
         tbody.innerHTML += `<tr class="fw-bold"><td>ĐƠN VỊ ${unit}</td><td>${s.tong.toLocaleString()}</td><td>${s.current.toLocaleString()}</td><td>${(s.tong-s.current).toLocaleString()}</td><td class="text-primary">${p}%</td></tr>`;
@@ -214,25 +198,26 @@ function updateUnitSummary() {
 
 function updateCharts() {
     const totalVoters = voterData.reduce((a, b) => a + parseInt(b.tong), 0);
-    const timeData = ['h9', 'h11', 'h15', 'h19', 'h22'].map(h => {
-        const val = voterData.reduce((a, b) => a + parseInt(b[h]), 0);
+    const timeKeys = ['h9', 'h11', 'h15', 'h19', 'h22'];
+    const timeLabels = ['9h', '11h30', '15h', '19h', '22h'];
+    const timeData = timeKeys.map(h => {
+        const val = voterData.reduce((a, b) => a + parseInt(b[h] || 0), 0);
         return totalVoters > 0 ? ((val / totalVoters) * 100).toFixed(2) : 0;
     });
 
     if (timeLineChart) timeLineChart.destroy();
     timeLineChart = new Chart(document.getElementById('timeLineChart'), {
         type: 'line',
-        data: { labels: ['9:00', '11:30', '15:00', '19:00', '22:00'], datasets: [{ label: 'Tiến độ (%)', data: timeData, borderColor: '#da251d', fill: true, backgroundColor: 'rgba(218, 37, 29, 0.1)' }] }
+        data: { labels: timeLabels, datasets: [{ label: 'Tiến độ theo mốc giờ (%)', data: timeData, borderColor: '#da251d', fill: true, backgroundColor: 'rgba(218, 37, 29, 0.1)', tension: 0.3 }] }
     });
 
     const summary = updateUnitSummary();
-
     if (unitBarChart) unitBarChart.destroy();
     unitBarChart = new Chart(document.getElementById('unitBarChart'), {
         type: 'bar', plugins: [ChartDataLabels],
         data: {
-            labels: Object.keys(summary).sort((a,b)=>a-b).map(u => 'ĐV ' + u),
-            datasets: [{ label: 'Tỷ lệ %', data: Object.keys(summary).sort((a,b)=>a-b).map(u => summary[u].tong > 0 ? ((summary[u].current/summary[u].tong)*100).toFixed(2) : 0), backgroundColor: '#1e3c72', borderRadius: 5 }]
+            labels: Object.keys(summary).sort((a,b)=>parseInt(a)-parseInt(b)).map(u => 'ĐV ' + u),
+            datasets: [{ label: 'Tỷ lệ % đi bầu hiện tại', data: Object.keys(summary).sort((a,b)=>parseInt(a)-parseInt(b)).map(u => summary[u].tong > 0 ? ((summary[u].current/summary[u].tong)*100).toFixed(2) : 0), backgroundColor: '#1e3c72', borderRadius: 5 }]
         },
         options: { scales: { y: { max: 115 } }, plugins: { datalabels: { anchor: 'end', align: 'top', formatter: v => v + '%', color: '#da251d', font: { weight: 'bold' } }, legend: { display: false } } }
     });
@@ -241,50 +226,26 @@ function updateCharts() {
     detailAreaChart = new Chart(document.getElementById('detailAreaChart'), {
         type: 'bar', plugins: [ChartDataLabels],
         data: {
-            labels: voterData.map(d => d.khu_vuc.replace("Khu vực bỏ phiếu số ", "KV ")),
-            datasets: [{ label: 'Tỷ lệ %', data: voterData.map(d => {
-                const cur = Math.max(d.h9, d.h11, d.h15, d.h19, d.h22);
+            labels: voterData.map(d => 'KV ' + d.stt),
+            datasets: [{ label: 'Tỷ lệ % hiện tại', data: voterData.map(d => {
+                const cur = getCurrent(d);
                 return d.tong > 0 ? ((cur / d.tong) * 100).toFixed(2) : 0;
             }), backgroundColor: '#28a745', borderRadius: 5 }]
         },
-        options: { maintainAspectRatio: false, scales: { y: { max: 120 }, x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 } } }, plugins: { datalabels: { anchor: 'end', align: 'top', formatter: v => v + '%', color: '#da251d', font: { size: 10, weight: 'bold' } }, legend: { display: false } } }
+        options: { maintainAspectRatio: false, scales: { y: { max: 125 }, x: { ticks: { autoSkip: false, font: { size: 9 } } } }, plugins: { datalabels: { anchor: 'end', align: 'top', formatter: v => v + '%', color: '#da251d', font: { size: 9, weight: 'bold' } }, legend: { display: false } } }
     });
 }
 
-function updateVal(index, field, newVal, label, oldVal) {
-    newVal = parseInt(newVal) || 0; oldVal = parseInt(oldVal) || 0;
-    if (newVal !== oldVal) {
-        voterData[index][field] = newVal;
-        addLog(`Sửa mốc ${label} - ${voterData[index].khu_vuc}: ${oldVal} → ${newVal}`, 'text-info');
-        init();
-    }
-}
-
-function saveTotal(index, newVal) {
-    const oldVal = voterData[index].tong; newVal = parseInt(newVal) || 0;
-    if (oldVal !== newVal) {
-        voterData[index].tong = newVal;
-        addLog(`SỬA TỔNG - ${voterData[index].khu_vuc}: ${oldVal} → ${newVal}`, 'text-warning');
-        init();
-    }
-    document.getElementById(`tong-${index}`).disabled = true;
-}
-
+function updateVal(index, field, newVal) { voterData[index][field] = parseInt(newVal) || 0; init(); }
+function saveTotal(index, newVal) { voterData[index].tong = parseInt(newVal) || 0; document.getElementById(`tong-${index}`).disabled = true; init(); }
 function enableEdit(index) { const el = document.getElementById(`tong-${index}`); el.disabled = false; el.focus(); el.select(); }
-function addLog(msg, colorClass) {
-    const time = new Date().toLocaleTimeString('vi-VN');
-    editLogs.unshift({ time, msg, colorClass });
-    if (editLogs.length > 50) editLogs.pop();
-    renderLogs();
-}
-function renderLogs() { document.getElementById('logContainer').innerHTML = editLogs.map(l => `<div class="log-item"><span class="text-muted small">[${l.time}]</span> <span class="${l.colorClass}">${l.msg}</span></div>`).join(''); }
-
+function addLog(msg, cl) { editLogs.unshift({ time: new Date().toLocaleTimeString('vi-VN'), msg, cl }); renderLogs(); }
+function renderLogs() { document.getElementById('logContainer').innerHTML = editLogs.map(l => `<div class="log-item small"><span class="text-muted">[${l.time}]</span> <span class="${l.cl}">${l.msg}</span></div>`).join(''); }
 function exportData() {
     let csv = "\ufeffSTT,Don Vi,Khu Vuc,Tong,h9,h11,h15,h19,h22\n";
     voterData.forEach(r => { csv += `${r.stt},${r.don_vi},${r.khu_vuc},${r.tong},${r.h9},${r.h11},${r.h15},${r.h19},${r.h22}\n`; });
     const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); link.download = "bao_cao_bau_cu.csv"; link.click();
 }
-
 window.onload = loadData;
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
