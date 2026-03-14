@@ -20,7 +20,7 @@
             padding: 18px 25px; font-weight: bold; color: #1e3c72; font-size: 1.1rem;
         }
         .full-width-card-header:hover { background-color: #fff8f8; }
-        .full-width-card-header::after { content: '▼'; font-size: 0.9rem; transition: transform 0.3s; }
+        .full-width-card-header::after { content: '▼'; font-size: 0.8rem; transition: transform 0.3s; }
         .full-width-card-header.collapsed::after { transform: rotate(-90deg); }
 
         .table-container-full { overflow-x: auto; width: 100%; }
@@ -30,8 +30,9 @@
         .total-cell-wrapper { display: flex; align-items: center; justify-content: center; gap: 4px; }
         .btn-edit-inline { font-size: 0.7rem; padding: 1px 4px; color: #da251d; border-color: #da251d; }
 
-        .btn-sync { background-color: #da251d; color: white; font-weight: bold; border-radius: 30px; padding: 10px 25px; box-shadow: 0 4px 10px rgba(218,37,29,0.3); transition: all 0.3s; }
-        .btn-sync:hover { background-color: #a01a14; transform: translateY(-2px); color: white; }
+        /* Nút đồng bộ kiểu mới để nằm trong card */
+        .btn-sync { background-color: #da251d; color: white; font-weight: bold; border-radius: 5px; padding: 5px 15px; font-size: 0.85rem; transition: all 0.3s; border: none; }
+        .btn-sync:hover { background-color: #a01a14; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         .unit-table-header th { color: #ffeb3b !important; font-weight: bold; text-transform: uppercase; }
         .log-section { background: #212529; color: #00ff41; font-family: 'Consolas', monospace; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; font-size: 0.8rem; }
@@ -52,20 +53,27 @@
 </div>
 
 <div class="container-fluid px-4">
-    <div class="d-flex justify-content-center mb-4">
-        <button class="btn btn-sync" onclick="syncWithGoogle()">
-            <span class="me-2">☁</span> ĐỒNG BỘ DỮ LIỆU LÊN CLOUD
-        </button>
-    </div>
-
     <div class="row mb-4">
         <div class="col-lg-6"><div class="card p-3 h-100"><canvas id="timeLineChart" height="180"></canvas></div></div>
         <div class="col-lg-6"><div class="card p-3 h-100"><canvas id="unitBarChart" height="180"></canvas></div></div>
     </div>
 
     <div class="card w-100 overflow-hidden">
+        <div class="full-width-card-header" data-bs-toggle="collapse" data-bs-target="#collapseChartDetail">
+            <span style="color: #28a745;">1. BIỂU ĐỒ SO SÁNH TỶ LỆ 34 KHU VỰC BỎ PHIẾU</span>
+        </div>
+        <div id="collapseChartDetail" class="collapse show">
+            <div class="card-body">
+                <div style="width: 100%; overflow-x: auto;">
+                    <div style="min-width: 1500px; height: 500px;"><canvas id="detailAreaChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card w-100 overflow-hidden">
         <div class="full-width-card-header collapsed" data-bs-toggle="collapse" data-bs-target="#collapseUnit">
-            <span style="color: #da251d;">1. TỔNG HỢP TỶ LỆ THEO ĐƠN VỊ BẦU CỬ</span>
+            <span style="color: #da251d;">2. TỔNG HỢP TỶ LỆ THEO ĐƠN VỊ BẦU CỬ</span>
         </div>
         <div id="collapseUnit" class="collapse">
             <div class="card-body p-0">
@@ -81,12 +89,15 @@
 
     <div class="card w-100">
         <div class="full-width-card-header collapsed" data-bs-toggle="collapse" data-bs-target="#collapseKhuVuc">
-            <span style="color: #1e3c72;">2. CHI TIẾT NHẬP LIỆU 34 KHU VỰC</span>
+            <span style="color: #1e3c72;">3. CHI TIẾT NHẬP LIỆU 34 KHU VỰC BỎ PHIẾU</span>
         </div>
         <div id="collapseKhuVuc" class="collapse">
             <div class="card-body">
-                <div class="d-flex justify-content-end mb-3">
-                    <button class="btn btn-outline-success btn-sm" onclick="exportData()">Xuất file CSV báo cáo</button>
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <button class="btn btn-sync" onclick="syncWithGoogle()">
+                        <span class="me-1">☁</span> ĐỒNG BỘ LÊN CLOUD
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="exportData()">Xuất file CSV</button>
                 </div>
                 <div class="table-container-full">
                     <table class="table table-hover table-bordered align-middle text-center">
@@ -104,19 +115,6 @@
         </div>
     </div>
 
-    <div class="card w-100 overflow-hidden">
-        <div class="full-width-card-header" data-bs-toggle="collapse" data-bs-target="#collapseChartDetail">
-            <span style="color: #28a745;">3. BIỂU ĐỒ SO SÁNH TỶ LỆ 34 KHU VỰC BỎ PHIẾU</span>
-        </div>
-        <div id="collapseChartDetail" class="collapse show">
-            <div class="card-body">
-                <div style="width: 100%; overflow-x: auto;">
-                    <div style="min-width: 1500px; height: 500px;"><canvas id="detailAreaChart"></canvas></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="card w-100 mb-5">
         <div class="card-header bg-dark text-white fw-bold small">NHẬT KÝ HỆ THỐNG</div>
         <div class="card-body"><div class="log-section" id="logContainer"></div></div>
@@ -124,14 +122,13 @@
 </div>
 
 <script>
-// URL CỦA BẠN ĐÃ ĐƯỢC CẬP NHẬT
+// URL CỦA BẠN
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUNbD2WnioJyjeneVWEtzPwhrdUo4koFNa3Jf2PrnV7G_tZHKYvZMzUngREyrrEG_opQ/exec"; 
 
 let voterData = [];
 let editLogs = [];
 let timeLineChart, unitBarChart, detailAreaChart;
 
-// Tải dữ liệu từ Google Sheets khi mở trang
 async function loadData() {
     document.getElementById('loadingOverlay').style.display = 'flex';
     try {
@@ -145,7 +142,6 @@ async function loadData() {
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
-// Hàm đồng bộ thủ công khi bấm nút
 async function syncWithGoogle() {
     if (!confirm("Xác nhận đẩy toàn bộ số liệu hiện tại lên Cloud?")) return;
     
@@ -223,7 +219,6 @@ function updateCharts() {
         return totalVoters > 0 ? ((val / totalVoters) * 100).toFixed(2) : 0;
     });
 
-    // Biểu đồ Line
     if (timeLineChart) timeLineChart.destroy();
     timeLineChart = new Chart(document.getElementById('timeLineChart'), {
         type: 'line',
@@ -232,7 +227,6 @@ function updateCharts() {
 
     const summary = updateUnitSummary();
 
-    // Biểu đồ Đơn vị
     if (unitBarChart) unitBarChart.destroy();
     unitBarChart = new Chart(document.getElementById('unitBarChart'), {
         type: 'bar', plugins: [ChartDataLabels],
@@ -243,7 +237,6 @@ function updateCharts() {
         options: { scales: { y: { max: 115 } }, plugins: { datalabels: { anchor: 'end', align: 'top', formatter: v => v + '%', color: '#da251d', font: { weight: 'bold' } }, legend: { display: false } } }
     });
 
-    // Biểu đồ 34 Khu vực
     if (detailAreaChart) detailAreaChart.destroy();
     detailAreaChart = new Chart(document.getElementById('detailAreaChart'), {
         type: 'bar', plugins: [ChartDataLabels],
