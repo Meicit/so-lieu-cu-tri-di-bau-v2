@@ -37,8 +37,8 @@
 
 <div class="container-fluid px-4">
     <div class="row mb-4">
-        <div class="col-lg-6"><div class="card p-3 h-100"><canvas id="timeLineChart" height="180"></canvas></div></div>
-        <div class="col-lg-6"><div class="card p-3 h-100"><canvas id="unitBarChart" height="180"></canvas></div></div>
+        <div class="col-lg-6"><div class="card p-3 h-100"><canvas id="timeLineChart" height="250"></canvas></div></div>
+        <div class="col-lg-6"><div class="card p-3 h-100"><canvas id="unitBarChart" height="250"></canvas></div></div>
     </div>
 
     <div class="card w-100 overflow-hidden">
@@ -84,7 +84,7 @@
                     <table class="table table-hover table-bordered align-middle text-center small">
                         <thead class="table-light">
                             <tr>
-                                <th rowspan="2">STT</th><th rowspan="2">ĐV</th><th rowspan="2" style="min-width: 180px;">Khu vực bỏ phiếu</th><th rowspan="2">Tổng số</th>
+                                <th rowspan="2">STT</th><th rowspan="2">ĐV</th><th rowspan="2" style="min-width: 160px;">Khu vực bỏ phiếu</th><th rowspan="2">Tổng số</th>
                                 <th colspan="5">Số bầu lũy tiến</th><th rowspan="2" class="bg-light">Chưa bầu</th><th rowspan="2">Tỷ lệ %</th>
                             </tr>
                             <tr><th>9:00</th><th>11:30</th><th>15:00</th><th>19:00</th><th>22:00</th></tr>
@@ -204,15 +204,15 @@ function updateCharts() {
         return totalVoters > 0 ? ((val / totalVoters) * 100).toFixed(2) : 0;
     });
 
-    // 1. BIỂU ĐỒ LINE - SỐ LIỆU TOÀN XÃ
+    // 1. BIỂU ĐỒ LINE - SỐ LIỆU TOÀN XÃ (Thêm tên thẻ và hiển thị số đầu chấm)
     if (timeLineChart) timeLineChart.destroy();
     timeLineChart = new Chart(document.getElementById('timeLineChart'), {
         type: 'line',
-        plugins: [ChartDataLabels], // Kích hoạt Plugin hiển thị số
+        plugins: [ChartDataLabels],
         data: { 
             labels: timeLabels, 
             datasets: [{ 
-                label: 'Số liệu trên địa bàn toàn xã (%)', // Tên nhãn mới
+                label: 'Số liệu trên địa bàn toàn xã (%)', 
                 data: timeData, 
                 borderColor: '#da251d', 
                 fill: true, 
@@ -224,21 +224,18 @@ function updateCharts() {
         },
         options: { 
             scales: { 
-                y: { min: 0, max: 110, ticks: { callback: v => v + '%' } } 
+                y: { min: 0, max: 120, ticks: { callback: v => v + '%' } } 
             },
             plugins: {
                 datalabels: {
                     anchor: 'end',
                     align: 'top',
-                    formatter: v => v + '%', // Hiển thị % trên đầu chấm
+                    formatter: v => v + '%',
                     font: { weight: 'bold', size: 11 },
                     color: '#da251d',
                     offset: 5
                 },
-                legend: { 
-                    display: true,
-                    labels: { font: { weight: 'bold' } }
-                }
+                legend: { display: true, labels: { font: { weight: 'bold' } } }
             }
         }
     });
@@ -251,7 +248,7 @@ function updateCharts() {
             labels: Object.keys(summary).sort((a,b)=>parseInt(a)-parseInt(b)).map(u => 'ĐV ' + u),
             datasets: [{ label: 'Tỷ lệ %', data: Object.keys(summary).sort((a,b)=>parseInt(a)-parseInt(b)).map(u => summary[u].tong > 0 ? ((summary[u].current/summary[u].tong)*100).toFixed(2) : 0), backgroundColor: '#1e3c72', borderRadius: 5 }]
         },
-        options: { scales: { y: { max: 115 } }, plugins: { datalabels: { anchor: 'end', align: 'top', formatter: v => v + '%', color: '#da251d', font: { weight: 'bold' } }, legend: { display: false } } }
+        options: { scales: { y: { min: 0, max: 120 } }, plugins: { datalabels: { anchor: 'end', align: 'top', formatter: v => v + '%', color: '#da251d', font: { weight: 'bold' } }, legend: { display: false } } }
     });
 
     if (detailAreaChart) detailAreaChart.destroy();
