@@ -125,7 +125,7 @@
 
 <script>
 // --- CẤU HÌNH GOOGLE SHEETS ---
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjXa5BOyxKkr2FNJoSv-BgnRRT1MSLFTeyfoNCF6Kr9qMVqO5gPNLiSQfZs8okqlZ9cQ/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUNbD2WnioJyjeneVWEtzPwhrdUo4koFNa3Jf2PrnV7G_tZHKYvZMzUngREyrrEG_opQ/exec"; 
 
 let voterData = [];
 let editLogs = JSON.parse(localStorage.getItem('voterLogs_v3')) || [];
@@ -188,20 +188,34 @@ function renderTable() {
     });
 }
 
+// Tìm hàm này trong file index.html và sửa lại như sau:
 function updateUnitSummary() {
     const summary = {};
     voterData.forEach(item => {
-        const dv = item.don_vi || "1"; // Nếu ko có cột đơn vị mặc định là 1
+        // Lấy đúng giá trị don_vi từ dữ liệu
+        const dv = item.don_vi; 
         if (!summary[dv]) summary[dv] = { tong: 0, current: 0 };
-        summary[dv].tong += parseInt(item.tong);
+        summary[dv].tong += parseInt(item.tong) || 0;
         summary[dv].current += Math.max(item.h9, item.h11, item.h15, item.h19, item.h22);
     });
+    
     const tbody = document.getElementById('unitSummaryBody');
     tbody.innerHTML = '';
-    for (let unit in summary) {
+    
+    // Sắp xếp đơn vị theo thứ tự 1, 2, 3... cho đẹp
+    const sortedUnits = Object.keys(summary).sort((a, b) => a - b);
+    
+    for (let unit of sortedUnits) {
         const s = summary[unit];
         const p = s.tong > 0 ? ((s.current / s.tong) * 100).toFixed(2) : 0;
-        tbody.innerHTML += `<tr class="fw-bold"><td>ĐƠN VỊ ${unit}</td><td>${s.tong.toLocaleString()}</td><td>${s.current.toLocaleString()}</td><td class="text-unvoted">${(s.tong - s.current).toLocaleString()}</td><td class="text-primary">${p}%</td></tr>`;
+        tbody.innerHTML += `
+            <tr class="fw-bold">
+                <td>ĐƠN VỊ ${unit}</td>
+                <td>${s.tong.toLocaleString()}</td>
+                <td>${s.current.toLocaleString()}</td>
+                <td class="text-unvoted">${(s.tong - s.current).toLocaleString()}</td>
+                <td class="text-primary">${p}%</td>
+            </tr>`;
     }
     return summary;
 }
