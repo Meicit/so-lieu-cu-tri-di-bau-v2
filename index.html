@@ -84,7 +84,7 @@
                     <table class="table table-hover table-bordered align-middle text-center small">
                         <thead class="table-light">
                             <tr>
-                                <th rowspan="2">STT</th><th rowspan="2">ĐV</th><th rowspan="2" style="min-width: 160px;">Khu vực bỏ phiếu</th><th rowspan="2">Tổng số</th>
+                                <th rowspan="2">STT</th><th rowspan="2">ĐV</th><th rowspan="2" style="min-width: 180px;">Khu vực bỏ phiếu</th><th rowspan="2">Tổng số</th>
                                 <th colspan="5">Số bầu lũy tiến</th><th rowspan="2" class="bg-light">Chưa bầu</th><th rowspan="2">Tỷ lệ %</th>
                             </tr>
                             <tr><th>9:00</th><th>11:30</th><th>15:00</th><th>19:00</th><th>22:00</th></tr>
@@ -121,7 +121,6 @@ function getUnitByKV(stt) {
 
 let voterData = [];
 let timeLineChart, unitBarChart, detailAreaChart;
-// KHỞI TẠO LOG TỪ LOCALSTORAGE
 let editLogs = JSON.parse(localStorage.getItem('voterLogs_v3')) || [];
 
 async function loadData() {
@@ -197,7 +196,7 @@ function updateUnitSummary() {
 }
 
 function updateCharts() {
-    const totalVoters = voterData.reduce((a, b) => a + parseInt(b.tong), 0);
+    const totalVoters = voterData.reduce((a, b) => a + parseInt(b.tong || 0), 0);
     const timeKeys = ['h9', 'h11', 'h15', 'h19', 'h22'];
     const timeLabels = ['9h', '11h30', '15h', '19h', '22h'];
     const timeData = timeKeys.map(h => {
@@ -205,10 +204,43 @@ function updateCharts() {
         return totalVoters > 0 ? ((val / totalVoters) * 100).toFixed(2) : 0;
     });
 
+    // 1. BIỂU ĐỒ LINE - SỐ LIỆU TOÀN XÃ
     if (timeLineChart) timeLineChart.destroy();
     timeLineChart = new Chart(document.getElementById('timeLineChart'), {
         type: 'line',
-        data: { labels: timeLabels, datasets: [{ label: 'Tiến độ (%)', data: timeData, borderColor: '#da251d', fill: true, backgroundColor: 'rgba(218, 37, 29, 0.1)', tension: 0.3 }] }
+        plugins: [ChartDataLabels], // Kích hoạt Plugin hiển thị số
+        data: { 
+            labels: timeLabels, 
+            datasets: [{ 
+                label: 'Số liệu trên địa bàn toàn xã (%)', // Tên nhãn mới
+                data: timeData, 
+                borderColor: '#da251d', 
+                fill: true, 
+                backgroundColor: 'rgba(218, 37, 29, 0.1)', 
+                tension: 0.3,
+                pointRadius: 5,
+                pointBackgroundColor: '#da251d'
+            }] 
+        },
+        options: { 
+            scales: { 
+                y: { min: 0, max: 110, ticks: { callback: v => v + '%' } } 
+            },
+            plugins: {
+                datalabels: {
+                    anchor: 'end',
+                    align: 'top',
+                    formatter: v => v + '%', // Hiển thị % trên đầu chấm
+                    font: { weight: 'bold', size: 11 },
+                    color: '#da251d',
+                    offset: 5
+                },
+                legend: { 
+                    display: true,
+                    labels: { font: { weight: 'bold' } }
+                }
+            }
+        }
     });
 
     const summary = updateUnitSummary();
